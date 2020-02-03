@@ -1,5 +1,4 @@
 package es.Studium.BasedeDatos;
-
 import java.awt.Button;
 import java.awt.FlowLayout;
 import java.awt.Frame;
