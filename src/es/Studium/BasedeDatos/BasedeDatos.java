@@ -20,15 +20,15 @@ public class BasedeDatos extends Frame implements WindowListener, ActionListener
 	TextField nombreCliente = new TextField(20);
 	Button next = new Button("Próximo");
 	String driver = "com.mysql.jdbc.Driver";
-	String url = "jdbc:mysql://localhost:3306/Empresa";
+	String url = "jdbc:mysql://localhost:3306/Tema7.Empresa?useSSL=false";
 	String login = "root";
-	String password = "studium";
-	String sentencia = "SELECT * FROM clientes";
+	String password = "Studium.2019;";
+	String sentencia = "SELECT * FROM Empleados";
 	Connection connection = null;
 	Statement statement = null;
 	ResultSet rs = null;
 
-	public basededatos()
+	public BasedeDatos()
 	{
 		setLayout(new FlowLayout());
 		setSize(200,200);
@@ -54,8 +54,7 @@ public class BasedeDatos extends Frame implements WindowListener, ActionListener
 		}
 		catch(SQLException e)
 		{
-			System.out.println("Se produjo un error al conectar a la Base de
-					Datos");
+			System.out.println("Se produjo un error al conectar a la Base de Datos");
 		}
 		//Preparar el statement
 		try
@@ -64,8 +63,8 @@ public class BasedeDatos extends Frame implements WindowListener, ActionListener
 			rs=statement.executeQuery(sentencia);
 			rs.next();
 			//Poner en los TextField los valores obtenidos del 1º
-			idCliente.setText(Integer.toString(rs.getInt("idCliente")));
-			nombreCliente.setText(rs.getString("nombreCliente"));
+			idCliente.setText(Integer.toString(rs.getInt("idEmpleado")));
+			nombreCliente.setText(rs.getString("nombreEmpleado"));
 		}
 		catch(SQLException e)
 		{
@@ -106,8 +105,8 @@ public class BasedeDatos extends Frame implements WindowListener, ActionListener
 			if(rs.next())
 			{
 				//Poner en los TextField los valores obtenidos
-				idCliente.setText(Integer.toString(rs.getInt("idCliente")));
-				nombreCliente.setText(rs.getString("nombreCliente"));
+				idCliente.setText(Integer.toString(rs.getInt("idEmpleado")));
+				nombreCliente.setText(rs.getString("nombreEmpleado"));
 			}
 		}
 		catch(SQLException e)
