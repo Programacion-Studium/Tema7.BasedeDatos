@@ -1,59 +1,118 @@
 package es.Studium.BasedeDatos;
 
+import java.awt.Button;
+import java.awt.FlowLayout;
+import java.awt.Frame;
+import java.awt.TextField;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-public class BasedeDatos
+public class BasedeDatos extends Frame implements WindowListener, ActionListener
 {
-	public static void main(String[] args)
+	private static final long serialVersionUID = 1L;
+	TextField idCliente = new TextField(20);
+	TextField nombreCliente = new TextField(20);
+	Button next = new Button("Próximo");
+	String driver = "com.mysql.jdbc.Driver";
+	String url = "jdbc:mysql://localhost:3306/Empresa";
+	String login = "root";
+	String password = "studium";
+	String sentencia = "SELECT * FROM clientes";
+	Connection connection = null;
+	Statement statement = null;
+	ResultSet rs = null;
+
+	public basededatos()
 	{
-		String driver = "com.mysql.jdbc.Driver";
-		String url = "jdbc:mysql://localhost:3306/tema7.empresa?useSSL=false";
-		String login = "root";
-		String password = "Studium.2019;";
-		String sentencia = "SELECT * FROM empleados";
-		Connection connection = null;
-		Statement statement = null;
-		ResultSet rs = null;
+		setLayout(new FlowLayout());
+		setSize(200,200);
+		setResizable(false);
+		add(idCliente);
+		add(nombreCliente);
+		add(next);
+		next.addActionListener(this);
+		addWindowListener(this);
+		//Cargar el Driver
 		try
 		{
-			//Cargar los controladores para el acceso a la BD
 			Class.forName(driver);
-			//Establecer la conexión con la BD Empresa
+		}
+		catch(ClassNotFoundException e)
+		{
+			System.out.println("Se ha producido un error al cargar el Driver");
+		}
+		//Establecer la conexión con la base de datos
+		try
+		{
 			connection = DriverManager.getConnection(url, login, password);
-			//Crear una sentencia
-			statement = connection.createStatement();
-			//Crear un objeto ResultSet para guardar lo obtenido
-			//y ejecutar la sentencia SQL
-			rs = statement.executeQuery(sentencia);
-			while (rs.next())
+		}
+		catch(SQLException e)
+		{
+			System.out.println("Se produjo un error al conectar a la Base de
+					Datos");
+		}
+		//Preparar el statement
+		try
+		{
+			statement=connection.createStatement();
+			rs=statement.executeQuery(sentencia);
+			rs.next();
+			//Poner en los TextField los valores obtenidos del 1º
+			idCliente.setText(Integer.toString(rs.getInt("idCliente")));
+			nombreCliente.setText(rs.getString("nombreCliente"));
+		}
+		catch(SQLException e)
+		{
+			System.out.println("Error en la sentencia SQL");
+		}
+		setVisible(true);
+	}
+	public static void main(String[] args)
+	{
+		new BasedeDatos();
+	}
+	public void windowActivated(WindowEvent windowEvent){}
+	public void windowClosed(WindowEvent windowEvent) {}
+	public void windowClosing(WindowEvent windowEvent)
+	{
+		//cerrar los elementos de la base de datos
+		try
+		{
+			rs.close();
+			statement.close();
+			connection.close();
+		}
+		catch(SQLException e)
+		{
+			System.out.println("error al cerrar "+e.toString());
+		}
+		System.exit(0);
+	}
+	public void windowDeactivated(WindowEvent windowEvent) {}
+	public void windowDeiconified(WindowEvent windowEvent) {}
+	public void windowIconified(WindowEvent windowEvent) {}
+	public void windowOpened(WindowEvent windowEvent) {}
+	public void actionPerformed(ActionEvent actionEvent)
+	{
+		try
+		{
+			//Si no hemos llegado al final
+			if(rs.next())
 			{
-				System.out.println(rs.getInt("idEmpleado") + "-" + rs.getString("nombreEmpleado"));
+				//Poner en los TextField los valores obtenidos
+				idCliente.setText(Integer.toString(rs.getInt("idCliente")));
+				nombreCliente.setText(rs.getString("nombreCliente"));
 			}
 		}
-		catch (ClassNotFoundException cnfe)
+		catch(SQLException e)
 		{
-			System.out.println("Error 1-"+cnfe.getMessage());
-		}
-		catch (SQLException sqle)
-		{
-			System.out.println("Error 2-"+sqle.getMessage());
-		}
-		finally
-		{
-			try
-			{
-				if(connection!=null)
-				{
-					connection.close();
-				}
-			}
-			catch (SQLException e)
-			{
-				System.out.println("Error 3-"+e.getMessage());
-			}
+			System.out.println("Error en la sentencia SQL" + e.getMessage());
 		}
 	}
 }
