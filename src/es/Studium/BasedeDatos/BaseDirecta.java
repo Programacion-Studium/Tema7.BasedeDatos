@@ -1,9 +1,8 @@
 package es.Studium.BasedeDatos;
+
 import java.awt.Button;
-import java.awt.Dialog;
 import java.awt.FlowLayout;
 import java.awt.Frame;
-import java.awt.Label;
 import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,37 +13,31 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-public class Base extends Frame implements WindowListener, ActionListener
+public class BaseDirecta extends Frame implements WindowListener, ActionListener
 {
 	private static final long serialVersionUID = 1L;
-	TextField nombreEmpleado = new TextField(20);
-	Button insertar = new Button("Insertar");
-	Button borrar = new Button("Borrar");
-	Dialog d = new Dialog(this, "Operación Inserción", true);
-	Label e = new Label ("Operación realizada correctamente!");
+	TextField idCliente = new TextField(20);
+	TextField nombreCliente = new TextField(20);
+	Button next = new Button("Próximo");
 	String driver = "com.mysql.jdbc.Driver";
 	String url = "jdbc:mysql://localhost:3306/Tema7.Empresa?useSSL=false";
 	String login = "root";
 	String password = "Studium.2019;";
+	String sentencia = "SELECT * FROM Empleados";
 	Connection connection = null;
 	Statement statement = null;
-	public Base()
+	ResultSet rs = null;
+
+	public BaseDirecta()
 	{
 		setLayout(new FlowLayout());
 		setSize(200,200);
 		setResizable(false);
-		add(nombreEmpleado);
-		add(insertar);
-		add(borrar);
-		insertar.addActionListener(this);
-		borrar.addActionListener(this);
+		add(idCliente);
+		add(nombreCliente);
+		add(next);
+		next.addActionListener(this);
 		addWindowListener(this);
-		// Diálogo
-		d.setLayout(new FlowLayout());
-		d.add(e);
-		d.setSize(250,150);
-		//Para poder cerrar el Diálogo
-		d.addWindowListener(this);
 		//Cargar el Driver
 		try
 		{
@@ -66,7 +59,12 @@ public class Base extends Frame implements WindowListener, ActionListener
 		//Preparar el statement
 		try
 		{
-			statement =connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_READ_ONLY);
+			statement=connection.createStatement();
+			rs=statement.executeQuery(sentencia);
+			rs.next();
+			//Poner en los TextField los valores obtenidos del 1º
+			idCliente.setText(Integer.toString(rs.getInt("idEmpleado")));
+			nombreCliente.setText(rs.getString("nombreEmpleado"));
 		}
 		catch(SQLException e)
 		{
@@ -76,31 +74,24 @@ public class Base extends Frame implements WindowListener, ActionListener
 	}
 	public static void main(String[] args)
 	{
-		new Base();
+		new BaseDirecta();
 	}
 	public void windowActivated(WindowEvent windowEvent){}
 	public void windowClosed(WindowEvent windowEvent) {}
 	public void windowClosing(WindowEvent windowEvent)
 	{
-		// Si es el Cerrar del diálogo
-		if(d.hasFocus())
+		//cerrar los elementos de la base de datos
+		try
 		{
-			d.setVisible(false);
+			rs.close();
+			statement.close();
+			connection.close();
 		}
-		else
+		catch(SQLException e)
 		{
-			//Cerrar los elementos de la base de datos
-			try
-			{
-				statement.close();
-				connection.close();
-			}
-			catch(SQLException e)
-			{
-				System.out.println("Error al cerrar "+e.toString());
-			}
-			System.exit(0);
+			System.out.println("error al cerrar "+e.toString());
 		}
+		System.exit(0);
 	}
 	public void windowDeactivated(WindowEvent windowEvent) {}
 	public void windowDeiconified(WindowEvent windowEvent) {}
@@ -108,25 +99,19 @@ public class Base extends Frame implements WindowListener, ActionListener
 	public void windowOpened(WindowEvent windowEvent) {}
 	public void actionPerformed(ActionEvent actionEvent)
 	{
-		// Hemos pulsado Insertar
-		if(insertar.equals(actionEvent.getSource()))
+		try
 		{
-			try
+			//Si no hemos llegado al final
+			if(rs.next())
 			{
-				statement.executeUpdate("INSERT INTO Empleados(nombreEmpleado)VALUES ('"+nombreEmpleado.getText()+"')");
-						nombreEmpleado.setText("");
-						d.setVisible(true);
-			}
-			catch(SQLException se)
-			{
-				System.out.println("Error en la sentencia SQL"+se.toString());
+				//Poner en los TextField los valores obtenidos
+				idCliente.setText(Integer.toString(rs.getInt("idEmpleado")));
+				nombreCliente.setText(rs.getString("nombreEmpleado"));
 			}
 		}
-		else
+		catch(SQLException e)
 		{
-			nombreEmpleado.getText();
-			nombreEmpleado.setText("");
+			System.out.println("Error en la sentencia SQL" + e.getMessage());
 		}
 	}
-}	
-	
+}
